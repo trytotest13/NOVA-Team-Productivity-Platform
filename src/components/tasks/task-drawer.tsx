@@ -1,7 +1,6 @@
 'use client';
 
 import { Trash2, X } from 'lucide-react';
-import { useSession } from 'next-auth/react';
 import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { createPortal } from 'react-dom';
 
@@ -13,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/toast';
+import { useAuth } from '@/components/auth/auth-provider';
 import { useBoardUi } from '@/stores/board-ui.store';
 import { useProjectMembers } from '@/hooks/use-projects';
 import {
@@ -43,7 +43,7 @@ const FOCUSABLE =
 
 export function TaskDrawer({ projectId, task }: { projectId: string; task: TaskItem | null }) {
   const { openTaskId, closeTask } = useBoardUi();
-  const { data: session } = useSession();
+  const { user: authUser } = useAuth();
   const { toast } = useToast();
   const updateTask = useUpdateTask(projectId);
   const deleteTask = useDeleteTask(projectId);
@@ -73,7 +73,7 @@ export function TaskDrawer({ projectId, task }: { projectId: string; task: TaskI
 
   if (!mounted || !mountedOnce || !openTaskId) return null;
 
-  const currentUserId = session?.user?.id;
+  const currentUserId = authUser?.id;
 
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>): void => {
     if (event.key === 'Escape') {

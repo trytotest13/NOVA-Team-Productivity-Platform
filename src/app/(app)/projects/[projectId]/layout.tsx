@@ -1,42 +1,54 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
+'use client';
+
+import Link from 'next/link';
+import { useParams } from 'next/navigation';
 
 import { ProjectTabs } from '@/components/layout/project-tabs';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
-import { authOptions } from '@/lib/auth';
-import { prisma } from '@/lib/prisma';
+import { ErrorState } from '@/components/ui/error-state';
+import { Skeleton } from '@/components/ui/skeleton';
+import { useProject } from '@/hooks/use-projects';
+import { HttpError } from '@/lib/http';
 
-export default async function ProjectLayout({
-  children,
-  params,
-}: {
-  children: React.ReactNode;
-  params: { projectId: string };
-}) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) redirect('/login');
+export default function ProjectLayout({ children }: { children: React.ReactNode }) {
+  const { projectId } = useParams<{ projectId: string }>();
+  const { data: project, isPending, isError, error, refetch } = useProject(projectId);
 
-  const membership = await prisma.projectMember.findUnique({
-    where: { projectId_userId: { projectId: params.projectId, userId: session.user.id } },
-    select: { role: true },
-  });
-  if (!membership) redirect('/dashboard');
+  if (isPending) {
+    return (
+      <div className="mx-auto w-full max-w-7xl space-y-4 px-4 py-8 md:px-6">
+        <Skeleton className="h-8 w-64" />
+        <Skeleton className="h-10 w-full" />
+        <div className="pt-6">{children}</div>
+      </div>
+    );
+  }
 
-  const project = await prisma.project.findUnique({
-    where: { id: params.projectId },
-    select: {
-      name: true,
-      color: true,
-      status: true,
-      dueDate: true,
-      members: {
-        orderBy: { joinedAt: 'asc' },
-        select: { user: { select: { id: true, name: true, image: true } } },
-      },
-    },
-  });
-  if (!project) redirect('/dashboard');
+  if (isError) {
+    const denied = error instanceof HttpError && error.status === 403;
+    return (
+      <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6">
+        <ErrorState
+          title={denied ? 'You do not have access' : 'Could not load project'}
+          description={
+            denied
+              ? 'This project belongs to another team. Head back to your own dashboard.'
+              : 'The project may have been deleted, or the API is unreachable.'
+          }
+          onRetry={denied ? undefined : () => void refetch()}
+        />
+        <p className="mt-2 text-center">
+          <Link
+            href="/dashboard"
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+          >
+            Go to dashboard
+          </Link>
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-7xl px-4 py-8 md:px-6">
@@ -65,7 +77,7 @@ export default async function ProjectLayout({
             />
           ))}
         </div>
-        <ProjectTabs projectId={params.projectId} />
+        <ProjectTabs projectId={projectId} />
       </header>
       <div className="pt-6">{children}</div>
     </div>

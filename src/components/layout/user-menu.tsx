@@ -1,12 +1,15 @@
 'use client';
 
-import { signOut } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
+import { useAuth } from '@/components/auth/auth-provider';
 import { Avatar } from '@/components/ui/avatar';
 import { DropdownMenu } from '@/components/ui/dropdown-menu';
 import type { UserSummary } from '@/types/api';
 
 export function UserMenu({ user }: { user: UserSummary }) {
+  const { logout } = useAuth();
+  const router = useRouter();
   const name = user.name ?? user.email ?? 'Account';
 
   return (
@@ -24,7 +27,10 @@ export function UserMenu({ user }: { user: UserSummary }) {
         {
           label: 'Log out',
           destructive: true,
-          onSelect: () => void signOut({ callbackUrl: '/' }),
+          onSelect: () => {
+            logout();
+            router.push('/');
+          },
         },
       ]}
     />

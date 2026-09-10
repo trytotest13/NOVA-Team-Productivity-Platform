@@ -1,11 +1,27 @@
-import { getServerSession } from 'next-auth';
-import { redirect } from 'next/navigation';
+'use client';
 
-import { authOptions } from '@/lib/auth';
+import { useRouter } from 'next/navigation';
+import { useEffect, type ReactNode } from 'react';
 
-export default async function AuthLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions);
-  if (session) redirect('/dashboard');
+import { useAuth } from '@/components/auth/auth-provider';
+import { Spinner } from '@/components/ui/spinner';
+
+/** Auth pages redirect signed-in users to the dashboard. */
+export default function AuthLayout({ children }: { children: ReactNode }) {
+  const { user, ready } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (ready && user) router.replace('/dashboard');
+  }, [ready, user, router]);
+
+  if (!ready || user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">

@@ -1,16 +1,21 @@
 import 'server-only';
 
 import { Prisma } from '@prisma/client';
-import type { Session } from 'next-auth';
-import { getServerSession } from 'next-auth';
+import { headers } from 'next/headers';
 import { NextResponse } from 'next/server';
 import { z, ZodError, type ZodTypeAny } from 'zod';
 
-import { authOptions } from '@/lib/auth';
+import { verifyAuthToken } from '@/lib/jwt';
 import { prisma } from '@/lib/prisma';
 
 export type ApiErrorCode =
-  'UNAUTHORIZED' | 'FORBIDDEN' | 'NOT_FOUND' | 'VALIDATION_ERROR' | 'CONFLICT' | 'INTERNAL';
+  | 'UNAUTHORIZED'
+  | 'FORBIDDEN'
+  | 'NOT_FOUND'
+  | 'VALIDATION_ERROR'
+  | 'CONFLICT'
+  | 'UNAVAILABLE'
+  | 'INTERNAL';
 
 /** Thrown anywhere inside a route handler; converted to a typed envelope by handleApiError. */
 export class ApiRequestError extends Error {
@@ -22,6 +27,13 @@ export class ApiRequestError extends Error {
   ) {
     super(message);
   }
+}
+
+export interface AuthUser {
+  id: string;
+  name: string | null;
+  email: string | null;
+  image: string | null;
 }
 
 export function apiSuccess<T>(data: T, status = 200): NextResponse {
@@ -62,17 +74,33 @@ export function handleApiError(error: unknown): NextResponse {
   );
 }
 
-export async function requireSession(): Promise<Session['user']> {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) {
+/** Verifies the Bearer JWT from the Authorization header and loads the user. */
+export async function requireSession(): Promise<AuthUser> {
+  const authHeader = headers().get('authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
     throw new ApiRequestError('UNAUTHORIZED', 401, 'You must be signed in');
   }
-  return session.user;
+
+  let userId: string;
+  try {
+    userId = await verifyAuthToken(authHeader.slice('Bearer '.length));
+  } catch {
+    throw new ApiRequestError('UNAUTHORIZED', 401, 'Session expired — sign in again');
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { id: true, name: true, email: true, image: true },
+  });
+  if (!user) {
+    throw new ApiRequestError('UNAUTHORIZED', 401, 'Account not found');
+  }
+  return user;
 }
 
 export async function requireProjectMember(
   projectId: string,
-): Promise<{ user: Session['user']; role: 'OWNER' | 'MEMBER'; isOwner: boolean }> {
+): Promise<{ user: AuthUser; role: 'OWNER' | 'MEMBER'; isOwner: boolean }> {
   const user = await requireSession();
   const member = await prisma.projectMember.findUnique({
     where: { projectId_userId: { projectId, userId: user.id } },

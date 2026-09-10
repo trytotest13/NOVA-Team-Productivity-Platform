@@ -1,16 +1,28 @@
-import { redirect } from 'next/navigation';
-import { getServerSession } from 'next-auth';
+'use client';
 
+import { useRouter } from 'next/navigation';
+import { useEffect, type ReactNode } from 'react';
+
+import { useAuth } from '@/components/auth/auth-provider';
 import { AppShell } from '@/components/layout/app-shell';
-import { authOptions } from '@/lib/auth';
+import { Spinner } from '@/components/ui/spinner';
 
-export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const session = await getServerSession(authOptions);
-  if (!session?.user?.id) redirect('/login');
+/** Client-side guard for the gated shell (web tier holds no server session — trd.md §5). */
+export default function AppLayout({ children }: { children: ReactNode }) {
+  const { user, ready } = useAuth();
+  const router = useRouter();
 
-  return (
-    <AppShell user={{ id: session.user.id, name: session.user.name, image: session.user.image }}>
-      {children}
-    </AppShell>
-  );
+  useEffect(() => {
+    if (ready && !user) router.replace('/login');
+  }, [ready, user, router]);
+
+  if (!ready || !user) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Spinner />
+      </div>
+    );
+  }
+
+  return <AppShell user={{ id: user.id, name: user.name, image: user.image }}>{children}</AppShell>;
 }

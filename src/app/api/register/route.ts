@@ -2,6 +2,7 @@ import { hash } from 'bcryptjs';
 import type { NextResponse } from 'next/server';
 
 import { apiSuccess, handleApiError, ApiRequestError, parseJsonBody } from '@/lib/api';
+import { signAuthToken } from '@/lib/jwt';
 import { prisma } from '@/lib/prisma';
 import { registerSchema } from '@/lib/validations/auth';
 
@@ -16,10 +17,11 @@ export async function POST(request: Request): Promise<NextResponse> {
 
     const user = await prisma.user.create({
       data: { name, email, passwordHash: await hash(password, 10) },
-      select: { id: true, name: true, email: true },
+      select: { id: true, name: true, email: true, image: true },
     });
 
-    return apiSuccess(user, 201);
+    const token = await signAuthToken(user.id);
+    return apiSuccess({ token, user }, 201);
   } catch (error: unknown) {
     return handleApiError(error);
   }

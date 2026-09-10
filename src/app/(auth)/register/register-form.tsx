@@ -1,16 +1,23 @@
 'use client';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { useAuth } from '@/components/auth/auth-provider';
 import { registerSchema, type RegisterInput } from '@/lib/validations/auth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { HttpError, apiFetch } from '@/lib/http';
 
-export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
+interface RegisterResponse {
+  token: string;
+  user: { id: string; name: string | null; email: string | null; image: string | null };
+}
+
+export function RegisterForm() {
+  const { adoptToken } = useAuth();
   const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
 
@@ -22,30 +29,20 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
 
   const onSubmit = async (values: RegisterInput): Promise<void> => {
     setFormError(null);
-
-    const response = await fetch('/api/register', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(values),
-    });
-
-    if (!response.ok) {
-      const body: { error?: { message?: string } } = await response.json().catch(() => ({}));
-      setFormError(body.error?.message ?? 'Could not create your account. Please try again.');
-      return;
+    try {
+      const result = await apiFetch<RegisterResponse>('/api/register', {
+        method: 'POST',
+        body: JSON.stringify(values),
+      });
+      await adoptToken(result.token);
+      router.push('/dashboard');
+    } catch (error: unknown) {
+      setFormError(
+        error instanceof HttpError
+          ? error.message
+          : 'Could not create your account. Please try again.',
+      );
     }
-
-    const result = await signIn('credentials', {
-      email: values.email,
-      password: values.password,
-      redirect: false,
-    });
-    if (result?.error) {
-      router.push('/login');
-      return;
-    }
-    router.push('/dashboard');
-    router.refresh();
   };
 
   return (
@@ -105,24 +102,6 @@ export function RegisterForm({ googleEnabled }: { googleEnabled: boolean }) {
       <Button type="submit" className="w-full" loading={isSubmitting}>
         Create account
       </Button>
-
-      {googleEnabled ? (
-        <>
-          <div className="flex items-center gap-3 py-1">
-            <span className="h-px flex-1 bg-slate-200" aria-hidden />
-            <span className="text-xs text-slate-400">or</span>
-            <span className="h-px flex-1 bg-slate-200" aria-hidden />
-          </div>
-          <Button
-            type="button"
-            variant="secondary"
-            className="w-full"
-            onClick={() => signIn('google', { callbackUrl: '/dashboard' })}
-          >
-            Continue with Google
-          </Button>
-        </>
-      ) : null}
     </form>
   );
 }

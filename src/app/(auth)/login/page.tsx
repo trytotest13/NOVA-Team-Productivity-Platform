@@ -1,7 +1,5 @@
 import Link from 'next/link';
 
-import { googleOAuthEnabled } from '@/lib/env';
-
 import { LoginForm } from './login-form';
 
 export default function LoginPage() {
@@ -9,7 +7,7 @@ export default function LoginPage() {
     <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-card">
       <h1 className="text-2xl font-semibold text-slate-900">Log in to NOVA</h1>
       <p className="mt-1 text-sm text-slate-600">Plan. Collaborate. Deliver.</p>
-      <LoginForm googleEnabled={googleOAuthEnabled} />
+      <LoginForm />
       <p className="mt-4 text-center text-sm text-slate-600">
         No account?{' '}
         <Link

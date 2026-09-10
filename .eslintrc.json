@@ -39,6 +39,8 @@
     {
       "files": [
         "src/lib/env.ts",
+        "src/lib/http.ts",
+        "src/middleware.ts",
         "prisma/seed.ts",
         "*.config.mjs",
         "*.config.ts",

@@ -1,0 +1,27 @@
+# Render blueprint for the NOVA API tier (trd.md §5b).
+# Deploy: Render dashboard → New → Blueprint → point at this repo.
+# The web tier deploys separately on Vercel (see DEPLOYMENT.md).
+
+services:
+  - type: web
+    name: nova-api
+    runtime: node
+    plan: free
+    buildCommand: pnpm install && pnpm build
+    startCommand: pnpm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: APP_ROLE
+        value: api
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false # set to your Neon/Render Postgres connection string (sslmode=require)
+      - key: AUTH_JWT_SECRET
+        generateValue: true
+      - key: FRONTEND_URL
+        sync: false # exact Vercel origin, e.g. https://nova.vercel.app
+      - key: GOOGLE_CLIENT_ID
+        sync: false # optional — leave empty to disable Google sign-in
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false

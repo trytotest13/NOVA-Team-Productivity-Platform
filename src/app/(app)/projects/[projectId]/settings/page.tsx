@@ -2,12 +2,12 @@
 
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Trash2, UserPlus, X } from 'lucide-react';
-import { useSession } from 'next-auth/react';
 import { useParams, useRouter } from 'next/navigation';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { useState } from 'react';
 
+import { useAuth } from '@/components/auth/auth-provider';
 import { Avatar } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -48,11 +48,11 @@ type SettingsValues = z.infer<typeof settingsSchema>;
 
 export default function SettingsPage() {
   const { projectId } = useParams<{ projectId: string }>();
-  const { data: session } = useSession();
+  const { user: authUser } = useAuth();
   const { data: project, isPending, isError, refetch } = useProject(projectId);
   const router = useRouter();
 
-  const currentUserId = session?.user?.id;
+  const currentUserId = authUser?.id;
   const myRole = project?.members.find((member) => member.user.id === currentUserId)?.role;
   const isOwner = myRole === 'OWNER';
 
