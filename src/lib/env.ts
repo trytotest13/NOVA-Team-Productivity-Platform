@@ -11,6 +11,7 @@ const envSchema = z.object({
   DATABASE_URL: z.string().min(1, 'DATABASE_URL is required (see .env.example)'),
   NEXTAUTH_URL: z.string().url('NEXTAUTH_URL must be a valid URL (see .env.example)'),
   NEXTAUTH_SECRET: z.string().min(16, 'NEXTAUTH_SECRET must be at least 16 characters'),
+  NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   GOOGLE_CLIENT_ID: z.string().optional().default(''),
   GOOGLE_CLIENT_SECRET: z.string().optional().default(''),
   SEED_DEMO_PASSWORD: z.string().optional().default(''),
@@ -30,3 +31,6 @@ if (!parsed.success) {
 export const env = parsed.data;
 
 export const googleOAuthEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
+
+export const isDev = env.NODE_ENV === 'development';
+export const isProd = env.NODE_ENV === 'production';
