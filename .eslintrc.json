@@ -23,8 +23,6 @@
       {
         "groups": ["builtin", "external", "internal", "parent", "sibling", "index"],
         "pathGroups": [
-          { "pattern": "react", "group": "builtin", "position": "before" },
-          { "pattern": "next/**", "group": "builtin", "position": "before" },
           { "pattern": "@/lib/**", "group": "internal" },
           { "pattern": "@/types/**", "group": "internal" },
           { "pattern": "@/components/**", "group": "internal", "position": "after" },
