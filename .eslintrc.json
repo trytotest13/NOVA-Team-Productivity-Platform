@@ -10,6 +10,7 @@
   },
   "rules": {
     "no-console": ["warn", { "allow": ["warn", "error"] }],
+    "import/no-named-as-default": "off",
     "no-restricted-properties": [
       "error",
       {
@@ -29,8 +30,7 @@
           { "pattern": "@/hooks/**", "group": "internal", "position": "after" },
           { "pattern": "@/stores/**", "group": "internal", "position": "after" }
         ],
-        "newlines-between": "always",
-        "alphabetize": { "order": "asc", "caseInsensitive": true }
+        "newlines-between": "always"
       }
     ],
     "react/no-unescaped-entities": "off"
