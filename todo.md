@@ -44,10 +44,15 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 
 ## In Progress
 
-- [/] P4-T5 Security pass (secret scan, audit, middleware coverage) — next up; P4-T6/P4-T7 need the
-  DB running and deployment accounts (user input required).
+- [/] P4-T6 Deployment (split: API on Render, Web on Vercel) — **code + configs complete, awaiting
+  your Render/Vercel accounts to click through**. Follow `DEPLOYMENT.md` (runbook) and `render.yaml`.
+  DB must be migrated/seeded first (`docker compose up -d` locally, or Neon/Render Postgres in prod).
 
 ## Done
+
+- [x] Split-deployment refactor (user request: "backend on Render, frontend on Vercel") — commits
+  fe10730 + b51a0f5. NextAuth cookie auth replaced with **JWT Bearer** (`jose`, HS256, 7d) because
+  cookies cannot cross the Vercel/Render origins; full change list in the Session Log below.
 
 - [x] P3-T1…P3-T8 — Phase 3 complete in one pass (commit 8348fa7): app shell + sidebar + user menu,
   dashboard (stats/my tasks/progress, deep-link to board drawer), projects list + create dialog +
@@ -95,3 +100,15 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 - 2026-09-11 — Phase 1 documentation generated (`prd.md`, `trd.md`, `architecture.md`, `design.md`,
   `schema.md`, `implementation.md`, `todo.md`, `rules.md`, `.gitignore`, `.env.example`, `SECURITY.md`).
   Awaiting user approval at the Phase 1 confirmation gate.
+
+- 2026-09-11 — Split-deployment refactor complete. Auth model: `POST /api/auth/login` + token-bearing
+  `/api/register` + `/api/auth/me`; Google OAuth moved to the API tier (`/api/auth/google[/callback]`,
+  id_token verified against Google JWKS, state cookie CSRF guard, redirect to web `/auth/callback#token`).
+  `requireSession()` now verifies `Authorization: Bearer` via `next/headers`; `middleware.ts` repurposed
+  as CORS gate (`FRONTEND_URL` origin, preflight 204); `/api/health` added for the Render probe.
+  Frontend: `AuthProvider` (localStorage token + /me hydration + 401 auto-logout), client-side route
+  guards in `(app)` and `(auth)` layouts, project layout de-servered (API-enforced membership, 403 UI),
+  next-auth + prisma-adapter removed, `jose` added. Env became role-aware (`APP_ROLE=api|web`) so the
+  web tier holds no DB credentials; local `.env` regenerated (gitignored, verified). ESLint: two
+  sanctioned `process.env` exceptions documented in rules.md (`lib/http.ts` NEXT_PUBLIC var,
+  `middleware.ts` Edge origin). Gates: lint 0 warnings, typecheck 0 errors, build 19 routes green.
