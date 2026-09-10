@@ -1,6 +1,12 @@
 import type { NextResponse } from 'next/server';
 
-import { apiSuccess, handleApiError, ApiRequestError, parseJsonBody, requireProjectMember } from '@/lib/api';
+import {
+  apiSuccess,
+  handleApiError,
+  ApiRequestError,
+  parseJsonBody,
+  requireProjectMember,
+} from '@/lib/api';
 import { prisma } from '@/lib/prisma';
 import { requireTaskAccess } from '@/lib/task-access';
 import { reorderTasksSchema } from '@/lib/validations/task';
@@ -13,7 +19,11 @@ export async function POST(request: Request, { params }: RouteParams): Promise<N
     const { task } = await requireTaskAccess(params.taskId);
     const { status, taskIds } = await parseJsonBody(request, reorderTasksSchema);
     if (!taskIds.includes(task.id)) {
-      throw new ApiRequestError('VALIDATION_ERROR', 422, 'The dragged task must be included in taskIds');
+      throw new ApiRequestError(
+        'VALIDATION_ERROR',
+        422,
+        'The dragged task must be included in taskIds',
+      );
     }
 
     const ownedCount = await prisma.task.count({

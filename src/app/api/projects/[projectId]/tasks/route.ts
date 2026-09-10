@@ -34,7 +34,9 @@ export async function GET(request: Request, { params }: RouteParams): Promise<Ne
         ...(filters.data.status ? { status: filters.data.status } : {}),
         ...(filters.data.priority ? { priority: filters.data.priority } : {}),
         ...(filters.data.assigneeId ? { assigneeId: filters.data.assigneeId } : {}),
-        ...(filters.data.q ? { title: { contains: filters.data.q, mode: 'insensitive' as const } } : {}),
+        ...(filters.data.q
+          ? { title: { contains: filters.data.q, mode: 'insensitive' as const } }
+          : {}),
       },
       orderBy: [{ status: 'asc' }, { position: 'asc' }],
       select: {

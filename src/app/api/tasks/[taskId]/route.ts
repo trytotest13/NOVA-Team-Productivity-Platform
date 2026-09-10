@@ -1,7 +1,13 @@
 import type { NextResponse } from 'next/server';
 
 import { logActivity } from '@/lib/activity';
-import { apiSuccess, handleApiError, ApiRequestError, parseJsonBody, requireProjectMember } from '@/lib/api';
+import {
+  apiSuccess,
+  handleApiError,
+  ApiRequestError,
+  parseJsonBody,
+  requireProjectMember,
+} from '@/lib/api';
 import { prisma } from '@/lib/prisma';
 import { assertAssigneeIsMember, requireTaskAccess } from '@/lib/task-access';
 import { updateTaskSchema } from '@/lib/validations/task';
@@ -15,17 +21,14 @@ export async function PATCH(request: Request, { params }: RouteParams): Promise<
     if (data.assigneeId) await assertAssigneeIsMember(task.projectId, data.assigneeId);
 
     const statusChanged = data.status !== undefined && data.status !== task.status;
-    const assigneeChanged =
-      data.assigneeId !== undefined && data.assigneeId !== task.assigneeId;
+    const assigneeChanged = data.assigneeId !== undefined && data.assigneeId !== task.assigneeId;
 
     const updated = await prisma.$transaction(async (tx) => {
       const result = await tx.task.update({
         where: { id: task.id },
         data: {
           ...data,
-          ...(statusChanged
-            ? { completedAt: data.status === 'DONE' ? new Date() : null }
-            : {}),
+          ...(statusChanged ? { completedAt: data.status === 'DONE' ? new Date() : null } : {}),
         },
         select: {
           id: true,
@@ -74,7 +77,11 @@ export async function DELETE(_request: Request, { params }: RouteParams): Promis
   try {
     const { task, userId, isOwner } = await requireTaskAccess(params.taskId);
     if (!isOwner && task.creatorId !== userId) {
-      throw new ApiRequestError('FORBIDDEN', 403, 'Only the creator or the project owner can delete a task');
+      throw new ApiRequestError(
+        'FORBIDDEN',
+        403,
+        'Only the creator or the project owner can delete a task',
+      );
     }
 
     await prisma.$transaction(async (tx) => {

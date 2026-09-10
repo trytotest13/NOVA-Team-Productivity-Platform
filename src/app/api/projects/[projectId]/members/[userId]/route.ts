@@ -7,10 +7,7 @@ import { prisma } from '@/lib/prisma';
 
 type RouteParams = { params: { projectId: string; userId: string } };
 
-export async function DELETE(
-  _request: Request,
-  { params }: RouteParams,
-): Promise<NextResponse> {
+export async function DELETE(_request: Request, { params }: RouteParams): Promise<NextResponse> {
   try {
     const { user: sessionUser, isOwner } = await requireProjectMember(params.projectId);
     if (!isOwner) {

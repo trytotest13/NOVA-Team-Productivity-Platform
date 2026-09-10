@@ -7,7 +7,6 @@ import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 
 import { registerSchema, type RegisterInput } from '@/lib/validations/auth';
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
