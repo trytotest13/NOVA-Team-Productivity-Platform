@@ -32,19 +32,30 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 - [ ] P3-T8 Dashboard (stats, my tasks, progress bars)
 
 ### Phase 4 — Polish & Deployment
-- [ ] P4-T1 Global loading/error/not-found + toasts everywhere
+- [ ] P4-T1 Global loading/error/not-found + toasts everywhere — **largely pre-completed in Phase 3**:
+  `(app)/loading.tsx`, `(app)/error.tsx`, root `not-found.tsx`, toasts on all mutations, skeletons on
+  every async surface. Remaining: sweep for missed states.
 - [ ] P4-T2 Accessibility pass (keyboard walkthrough, axe, contrast)
 - [ ] P4-T3 Responsive QA (360/768/1280)
 - [ ] P4-T4 Performance pass (Lighthouse ≥ 90)
 - [ ] P4-T5 Security pass (secret scan, audit, middleware coverage)
-- [ ] P4-T6 Deployment (Neon + Vercel, migrations, OAuth prod URIs, prod seed)
+- [ ] P4-T6 Deployment (Neon + Vercel, migrations, OAuth prod URIs, prod seed) — needs Neon/Vercel accounts
 - [ ] P4-T7 Final QA + README + demo script
 
 ## In Progress
 
-- [/] P3-T1 App shell (sidebar, topbar, user menu)
+- [/] P4-T5 Security pass (secret scan, audit, middleware coverage) — next up; P4-T6/P4-T7 need the
+  DB running and deployment accounts (user input required).
 
 ## Done
+
+- [x] P3-T1…P3-T8 — Phase 3 complete in one pass (commit 8348fa7): app shell + sidebar + user menu,
+  dashboard (stats/my tasks/progress, deep-link to board drawer), projects list + create dialog +
+  archive/delete, project layout with tabs + server-side membership gate, kanban board (dnd-kit,
+  optimistic reorder w/ rollback, quick-add, keyboard "Move to…" path), task list with URL-driven
+  filters + overdue highlighting, shared task drawer (edit/assign/due date, comments, delete),
+  activity feed (infinite scroll, human-readable), settings + member manager (owner-guarded,
+  last-owner protection surfaced via toasts). lint + typecheck + build all green (12 routes).
 
 - [x] P1-T1…P1-T6 — Phase 1 complete (see Session Log history below).
 - [x] P2-T1 Local database — docker-compose.yml (postgres:16) + Prisma 5.22 singleton + db scripts.
