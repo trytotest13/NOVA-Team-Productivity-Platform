@@ -34,4 +34,6 @@ CI alternative: run `gitleaks detect --no-git -r report.json` (or `gitleaks dete
 - [ ] Zod validation at every API boundary; authorization (`requireSession`/`requireProjectMember`) before every DB touch
 - [ ] Error responses never expose stack traces, SQL, or internal identifiers
 - [ ] `pnpm audit` before each phase completion; dependabot-style updates as needed
-- [ ] Prod DB (Neon) uses TLS (`sslmode=require` in connection string) and is never shared in screenshots
+- [ ] Prod DB uses TLS (`sslmode=require` in connection string) and is never shared in screenshots
+- [ ] JWT storage: token lives in `localStorage` on the web tier (assignment-scale tradeoff; XSS mitigated by React escaping + zero `dangerouslySetInnerHTML` - production-grade would use in-memory + refresh tokens)
+- [ ] `AUTH_JWT_SECRET` and `DATABASE_URL` exist only on the API tier (Render); the web tier never receives DB credentials

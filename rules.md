@@ -56,7 +56,9 @@ Absolute `@/` alias is mandatory for cross-feature imports — no `../../../` cl
 ## 6. Banned Patterns
 
 - `console.log` in committed code (`console.error`/`warn` allowed server-side).
-- `process.env` outside `lib/env.ts`.
+- `process.env` outside `lib/env.ts` — **two sanctioned exceptions** (lint-enforced): `lib/http.ts`
+  reads `NEXT_PUBLIC_API_URL` (must be inlined into the client bundle; `lib/env.ts` is server-only),
+  and `middleware.ts` reads `FRONTEND_URL` (Edge runtime cannot import the server-only env module).
 - Default exports **except** Next.js special files (`page/layout/route/error/loading/not-found/middleware`).
 - Secrets, tokens, connection strings in code or docs — **any** appearance stops the commit (see §8).
 - `useEffect` for data fetching (use TanStack Query); `index` as React `key` on dynamic lists (use entity id).

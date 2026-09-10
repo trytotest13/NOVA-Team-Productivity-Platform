@@ -138,10 +138,14 @@
   check, header review (Vercel defaults), confirm error messages leak nothing.
 - **AC:** SECURITY.md checklist fully ticked; no findings outstanding.
 
-### P4-T6 — Deployment
-- Neon project + `DATABASE_URL`; Vercel project (env vars in dashboard); `prisma migrate deploy`;
-  Google OAuth redirect URI for prod domain; seed demo data on prod DB.
-- **AC:** public URL serves the app; login + full board flow work on prod; unauthenticated API probes return 401.
+### P4-T6 — Deployment (split: API on Render, Web on Vercel)
+- **API (Render):** create Postgres (or reuse Neon) → Render web service from the repo
+  (build `pnpm install && pnpm build`, start `pnpm start`, health check `/api/health`) → set
+  `APP_ROLE=api`, `DATABASE_URL`, `AUTH_JWT_SECRET`, `FRONTEND_URL`, Google creds → `pnpm db:deploy` → seed.
+- **Web (Vercel):** import repo → set `APP_ROLE=web` + `NEXT_PUBLIC_API_URL=https://<render-app>.onrender.com`.
+- **Google OAuth:** register redirect URI `https://<render-app>.onrender.com/api/auth/google/callback`.
+- **AC:** Vercel URL loads; login + full board flow work cross-origin (CORS verified);
+  direct unauthenticated API probes return 401 + correct CORS headers.
 
 ### P4-T7 — Final QA + README
 - README: overview, screenshots, stack rationale, local setup, demo account, feature→rubric mapping,

@@ -32,8 +32,8 @@ complete application stack — **Frontend → Backend → API → Database → A
 
 ### FR-1 — Authentication & Account
 - User can **register** with name, email, and password (min 8 chars); password stored hashed (bcrypt).
-- User can **log in** with email + password, and **log out**.
-- User can **log in with Google** (OAuth 2.0).
+- User can **log in** with email + password, and **log out** (JWT Bearer session, 7-day expiry).
+- User can **log in with Google** (OAuth 2.0, handled by the API tier).
 - Session persists across refreshes; protected routes redirect anonymous users to login.
 - Authenticated user has a profile (name, email, avatar) shown in the app shell.
 
