@@ -1,14 +1,21 @@
 import type { NextResponse } from 'next/server';
-import { startOfWeek } from 'date-fns';
 
 import { apiSuccess, handleApiError, requireSession } from '@/lib/api';
 import { prisma } from '@/lib/prisma';
+
+/** Monday 00:00 of the week containing `now` (replaces date-fns startOfWeek). */
+function weekStartOnMonday(now: Date): Date {
+  const start = new Date(now);
+  start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+  start.setHours(0, 0, 0, 0);
+  return start;
+}
 
 export async function GET(_request: Request): Promise<NextResponse> {
   try {
     const user = await requireSession();
     const now = new Date();
-    const weekStart = startOfWeek(now, { weekStartsOn: 1 });
+    const weekStart = weekStartOnMonday(now);
 
     const [myOpenTasks, overdueCount, completedThisWeek, projects] = await Promise.all([
       prisma.task.findMany({

@@ -25,7 +25,7 @@ export function setAuthToken(token: string): void {
   try {
     localStorage.setItem(TOKEN_KEY, token);
   } catch {
-    // storage disabled — session will not persist across reloads
+    // storage disabled: session will not persist across reloads
   }
 }
 
@@ -33,7 +33,7 @@ export function clearAuthToken(): void {
   try {
     localStorage.removeItem(TOKEN_KEY);
   } catch {
-    // storage disabled — nothing to clear
+    // storage disabled: nothing to clear
   }
 }
 

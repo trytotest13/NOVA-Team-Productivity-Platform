@@ -4,7 +4,7 @@ import { z } from 'zod';
 
 /**
  * Boot-time environment validation (rules.md §8, trd.md §6).
- * The only module allowed to read process.env — everywhere else imports `env` from here.
+ * The only module allowed to read process.env: everywhere else imports `env` from here.
  * Role-aware via APP_ROLE: the API tier requires DB + JWT secrets; the web tier needs neither.
  */
 const envSchema = z

@@ -7,7 +7,7 @@ import { useAuth } from '@/components/auth/auth-provider';
 import { AppShell } from '@/components/layout/app-shell';
 import { Spinner } from '@/components/ui/spinner';
 
-/** Client-side guard for the gated shell (web tier holds no server session — trd.md §5). */
+/** Client-side guard for the gated shell (web tier holds no server session: trd.md §5). */
 export default function AppLayout({ children }: { children: ReactNode }) {
   const { user, ready } = useAuth();
   const router = useRouter();

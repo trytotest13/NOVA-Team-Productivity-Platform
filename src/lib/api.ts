@@ -85,7 +85,7 @@ export async function requireSession(): Promise<AuthUser> {
   try {
     userId = await verifyAuthToken(authHeader.slice('Bearer '.length));
   } catch {
-    throw new ApiRequestError('UNAUTHORIZED', 401, 'Session expired — sign in again');
+    throw new ApiRequestError('UNAUTHORIZED', 401, 'Session expired. Sign in again');
   }
 
   const user = await prisma.user.findUnique({

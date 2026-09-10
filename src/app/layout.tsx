@@ -13,7 +13,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'NOVA — Plan. Collaborate. Deliver.',
+  title: 'NOVA - Plan. Collaborate. Deliver.',
   description:
     'NOVA is a project management platform for teams to manage projects, tasks, members and productivity from a single application.',
 };

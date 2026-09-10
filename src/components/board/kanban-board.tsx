@@ -1,21 +1,10 @@
 'use client';
 
-import {
-  DndContext,
-  DragOverlay,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-  type DragStartEvent,
-} from '@dnd-kit/core';
-import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
 import { useQueryClient } from '@tanstack/react-query';
 import { Plus } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 
-import { DraggableTaskCard } from '@/components/board/draggable-task-card';
+import { TaskCard } from '@/components/board/task-card';
 import { TaskDrawer } from '@/components/tasks/task-drawer';
 import { Button } from '@/components/ui/button';
 import { useBoardUi } from '@/stores/board-ui.store';
@@ -36,12 +25,6 @@ export function KanbanBoard({ projectId }: { projectId: string }) {
   const queryClient = useQueryClient();
   const { openTaskId, openTask, closeTask, quickAddStatus, setQuickAddStatus } = useBoardUi();
 
-  const [activeTask, setActiveTask] = useState<TaskItem | null>(null);
-  const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
-    useSensor(KeyboardSensor),
-  );
-
   const columns = useMemo(() => {
     const map = new Map<TaskStatus, TaskItem[]>();
     for (const status of TASK_STATUSES) map.set(status, []);
@@ -53,30 +36,15 @@ export function KanbanBoard({ projectId }: { projectId: string }) {
 
   const openTaskFromCache = tasks?.find((task) => task.id === openTaskId) ?? null;
 
-  const handleDragStart = (event: DragStartEvent): void => {
-    const task = tasks?.find((candidate) => candidate.id === event.active.id);
-    setActiveTask(task ?? null);
-  };
-
-  /** Applies a status/order change optimistically and persists it. */
-  const moveTask = (taskId: string, targetStatus: TaskStatus, beforeTaskId?: string): void => {
+  /** Applies a status change optimistically and persists it. */
+  const moveTask = (taskId: string, targetStatus: TaskStatus): void => {
     if (!tasks) return;
     const task = tasks.find((candidate) => candidate.id === taskId);
     if (!task) return;
 
     const column = columns.get(targetStatus) ?? [];
     const columnWithoutActive = column.filter((candidate) => candidate.id !== taskId);
-    const overIndex = beforeTaskId
-      ? Math.max(
-          columnWithoutActive.findIndex((candidate) => candidate.id === beforeTaskId),
-          0,
-        )
-      : columnWithoutActive.length;
-    const taskIds = [
-      ...columnWithoutActive.slice(0, overIndex),
-      task,
-      ...columnWithoutActive.slice(overIndex),
-    ].map((candidate) => candidate.id);
+    const taskIds = [...columnWithoutActive, task].map((candidate) => candidate.id);
 
     const unchanged =
       task.status === targetStatus && taskIds.every((id, index) => column[index]?.id === id);
@@ -95,7 +63,7 @@ export function KanbanBoard({ projectId }: { projectId: string }) {
     reorderTasks.mutate({ taskId, status: targetStatus, taskIds });
   };
 
-  // Keyboard/AT path dispatched by the card "Move to…" menu
+  // Status changes dispatched by the card "Move to…" menu
   useEffect(() => {
     const handler = (event: Event): void => {
       const detail = (event as CustomEvent<{ taskId: string; status: TaskStatus }>).detail;
@@ -105,23 +73,6 @@ export function KanbanBoard({ projectId }: { projectId: string }) {
     return () => window.removeEventListener('nova:move-task', handler);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- handlers close over the latest tasks via moveTask
   });
-
-  const handleDragEnd = (event: DragEndEvent): void => {
-    setActiveTask(null);
-    const { active, over } = event;
-    if (!over || !tasks) return;
-
-    const activeTaskItem = tasks.find((task) => task.id === active.id);
-    const overTaskItem = tasks.find((task) => task.id === over.id);
-    if (!activeTaskItem) return;
-
-    const targetStatus: TaskStatus =
-      overTaskItem?.status ??
-      (over.data.current?.status as TaskStatus | undefined) ??
-      activeTaskItem.status;
-
-    moveTask(activeTaskItem.id, targetStatus, overTaskItem?.id);
-  };
 
   if (isPending) {
     return (
@@ -152,79 +103,60 @@ export function KanbanBoard({ projectId }: { projectId: string }) {
 
   return (
     <>
-      <DndContext sensors={sensors} onDragStart={handleDragStart} onDragEnd={handleDragEnd}>
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {TASK_STATUSES.map((status) => {
-            const columnTasks = columns.get(status) ?? [];
-            return (
-              <section
-                key={status}
-                aria-label={`${STATUS_LABELS[status]} column`}
-                className="flex w-72 shrink-0 flex-col rounded-xl bg-slate-50 md:w-80"
-                data-status={status}
-              >
-                <header className="flex items-center justify-between px-3 py-3">
-                  <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
-                    <ColumnDot status={status} />
-                    {STATUS_LABELS[status]}
-                    <span className="text-xs font-normal tabular-nums text-slate-400">
-                      {columnTasks.length}
-                    </span>
-                  </h2>
-                  <button
-                    type="button"
-                    aria-label={`Add task to ${STATUS_LABELS[status]}`}
-                    onClick={() => setQuickAddStatus(status)}
-                    className="rounded-md p-1 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
-                  >
-                    <Plus className="h-4 w-4" aria-hidden />
-                  </button>
-                </header>
+      <div className="flex gap-4 overflow-x-auto pb-4">
+        {TASK_STATUSES.map((status) => {
+          const columnTasks = columns.get(status) ?? [];
+          return (
+            <section
+              key={status}
+              aria-label={`${STATUS_LABELS[status]} column`}
+              className="flex w-72 shrink-0 flex-col rounded-xl bg-slate-50 md:w-80"
+              data-status={status}
+            >
+              <header className="flex items-center justify-between px-3 py-3">
+                <h2 className="flex items-center gap-2 text-sm font-semibold text-slate-900">
+                  <ColumnDot status={status} />
+                  {STATUS_LABELS[status]}
+                  <span className="text-xs font-normal tabular-nums text-slate-400">
+                    {columnTasks.length}
+                  </span>
+                </h2>
+                <button
+                  type="button"
+                  aria-label={`Add task to ${STATUS_LABELS[status]}`}
+                  onClick={() => setQuickAddStatus(status)}
+                  className="rounded-md p-1 text-slate-400 transition-colors duration-150 hover:bg-slate-100 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  <Plus className="h-4 w-4" aria-hidden />
+                </button>
+              </header>
 
-                <div className="flex min-h-[120px] flex-1 flex-col gap-2 px-2 pb-2">
-                  <SortableContext
-                    items={columnTasks.map((task) => task.id)}
-                    strategy={verticalListSortingStrategy}
-                  >
-                    {columnTasks.map((task) => (
-                      <DraggableTaskCard
-                        key={task.id}
-                        task={task}
-                        onOpen={() => openTask(task.id)}
-                      />
-                    ))}
-                  </SortableContext>
+              <div className="flex min-h-[120px] flex-1 flex-col gap-2 px-2 pb-2">
+                {columnTasks.map((task) => (
+                  <TaskCard key={task.id} task={task} onOpen={() => openTask(task.id)} />
+                ))}
 
-                  {quickAddStatus === status ? (
-                    <QuickAdd
-                      onSubmit={(title) => {
-                        createTask.mutate(
-                          { title, status },
-                          { onSettled: () => setQuickAddStatus(null) },
-                        );
-                      }}
-                      onCancel={() => setQuickAddStatus(null)}
-                      submitting={createTask.isPending}
-                    />
-                  ) : columnTasks.length === 0 ? (
-                    <p className="rounded-lg border border-dashed border-slate-200 py-6 text-center text-xs text-slate-400">
-                      Drop tasks here
-                    </p>
-                  ) : null}
-                </div>
-              </section>
-            );
-          })}
-        </div>
-
-        <DragOverlay>
-          {activeTask ? (
-            <div className="rotate-1 opacity-90">
-              <TaskCardContents task={activeTask} />
-            </div>
-          ) : null}
-        </DragOverlay>
-      </DndContext>
+                {quickAddStatus === status ? (
+                  <QuickAdd
+                    onSubmit={(title) => {
+                      createTask.mutate(
+                        { title, status },
+                        { onSettled: () => setQuickAddStatus(null) },
+                      );
+                    }}
+                    onCancel={() => setQuickAddStatus(null)}
+                    submitting={createTask.isPending}
+                  />
+                ) : columnTasks.length === 0 ? (
+                  <p className="rounded-lg border border-dashed border-slate-200 py-6 text-center text-xs text-slate-400">
+                    No tasks yet
+                  </p>
+                ) : null}
+              </div>
+            </section>
+          );
+        })}
+      </div>
 
       <TaskDrawer projectId={projectId} task={openTaskFromCache} />
     </>
@@ -290,13 +222,5 @@ function QuickAdd({
         </Button>
       </div>
     </form>
-  );
-}
-
-function TaskCardContents({ task }: { task: TaskItem }): React.ReactNode {
-  return (
-    <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-card">
-      <p className="text-sm font-medium text-slate-900">{task.title}</p>
-    </div>
   );
 }

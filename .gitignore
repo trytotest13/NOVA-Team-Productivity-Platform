@@ -1,4 +1,4 @@
-# ── Secrets & Environment ─────────────────────
+# Secrets & Environment
 .env
 .env.*
 !.env.example
@@ -9,19 +9,19 @@
 credentials.json
 service-account*.json
 
-# ── Dependencies ──────────────────────────────
+# Dependencies
 node_modules/
 .pnp
 .pnp.js
 
-# ── Build output ──────────────────────────────
+# Build output
 .next/
 out/
 build/
 dist/
 *.tsbuildinfo
 
-# ── Logs & caches ─────────────────────────────
+# Logs & caches
 *.log
 npm-debug.log*
 yarn-debug.log*
@@ -33,12 +33,16 @@ Thumbs.db
 .turbo/
 coverage/
 
-# ── Editors & local tooling ───────────────────
+# Editors & local tooling
 .vscode/*
 !.vscode/extensions.json
 .idea/
 *.swp
 
-# ── Local scratch (rendered previews, repairs) ─
+# Local scratch (rendered previews, repairs)
 _page*.png
 _repaired*.pdf
+
+# Documents
+*.md
+*.pdf

@@ -49,7 +49,7 @@ export async function POST(request: Request, { params }: RouteParams): Promise<N
       throw new ApiRequestError(
         'NOT_FOUND',
         404,
-        'No NOVA user with that email yet — ask them to sign up first',
+        'No NOVA user with that email yet. Ask them to sign up first',
       );
     }
 

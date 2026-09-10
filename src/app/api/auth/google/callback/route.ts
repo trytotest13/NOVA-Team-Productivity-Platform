@@ -34,7 +34,7 @@ export async function GET(request: Request): Promise<NextResponse> {
       ?.split('=')[1];
 
     if (!code || !state || !expectedState || state !== expectedState) {
-      throw new ApiRequestError('VALIDATION_ERROR', 400, 'Invalid OAuth state — try again');
+      throw new ApiRequestError('VALIDATION_ERROR', 400, 'Invalid OAuth state. Try again');
     }
 
     const redirectUri = new URL('/api/auth/google/callback', request.url).toString();

@@ -95,14 +95,14 @@ export default function ListPage() {
                       {task.priority}
                     </td>
                     <td className="hidden px-4 py-2.5 text-slate-600 lg:table-cell">
-                      {task.assignee?.name ?? '—'}
+                      {task.assignee?.name ?? '-'}
                     </td>
                     <td
                       className={`px-4 py-2.5 tabular-nums ${
                         overdue ? 'font-medium text-red-600' : 'text-slate-500'
                       }`}
                     >
-                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '—'}
+                      {task.dueDate ? new Date(task.dueDate).toLocaleDateString() : '-'}
                     </td>
                   </tr>
                 );

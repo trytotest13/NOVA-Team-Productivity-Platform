@@ -2,7 +2,6 @@
 
 import { Activity as ActivityIcon } from 'lucide-react';
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { formatDistanceToNow } from 'date-fns';
 import { useParams } from 'next/navigation';
 
 import { Avatar } from '@/components/ui/avatar';
@@ -12,6 +11,21 @@ import { ErrorState } from '@/components/ui/error-state';
 import { Skeleton } from '@/components/ui/skeleton';
 import { apiFetch } from '@/lib/http';
 import type { ActivityItem, ActivityPage } from '@/types/api';
+
+/** Compact relative time (replaces date-fns formatDistanceToNow). */
+function timeAgo(iso: string): string {
+  const minutes = Math.max(0, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
+  if (minutes < 1) return 'just now';
+  if (minutes < 60) return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+  const hours = Math.round(minutes / 60);
+  if (hours < 24) return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+  const days = Math.round(hours / 24);
+  if (days < 30) return `${days} day${days === 1 ? '' : 's'} ago`;
+  const months = Math.round(days / 30);
+  if (months < 12) return `${months} month${months === 1 ? '' : 's'} ago`;
+  const years = Math.round(months / 12);
+  return `${years} year${years === 1 ? '' : 's'} ago`;
+}
 
 function describe(activity: ActivityItem): string {
   const actor = activity.actor.name ?? 'Someone';
@@ -107,7 +121,7 @@ export default function ActivityPage() {
                 {describe(activity)}
               </p>
               <p className="text-xs text-slate-400">
-                {formatDistanceToNow(new Date(activity.createdAt), { addSuffix: true })}
+                {timeAgo(activity.createdAt)}
               </p>
             </div>
           </li>

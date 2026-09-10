@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { env, googleOAuthEnabled } from '@/lib/env';
 import { handleApiError, ApiRequestError } from '@/lib/api';
 
-/** Starts the Google OAuth flow (optional feature — 503 when credentials are absent). */
+/** Starts the Google OAuth flow (optional feature: 503 when credentials are absent). */
 export async function GET(request: Request): Promise<NextResponse> {
   try {
     if (!googleOAuthEnabled) {

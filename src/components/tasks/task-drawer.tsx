@@ -238,7 +238,7 @@ export function TaskDrawer({ projectId, task }: { projectId: string; task: TaskI
               <Skeleton className="h-12 w-4/5" />
             </div>
           ) : (comments ?? []).length === 0 ? (
-            <p className="mt-2 text-sm text-slate-500">No comments yet — start the conversation.</p>
+            <p className="mt-2 text-sm text-slate-500">No comments yet. Start the conversation.</p>
           ) : (
             <ul className="mt-2 space-y-3">
               {(comments ?? []).map((comment) => (
