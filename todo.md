@@ -13,8 +13,6 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 ## Todo
 
 ### Phase 1 — Setup & Tooling
-- [ ] P1-T2 Scaffold Next.js 14 (App Router, TS strict, src/, @ alias)
-- [ ] P1-T3 Prettier + ESLint gates + npm scripts
 - [ ] P1-T4 Design tokens in Tailwind config + globals.css + Inter font
 - [ ] P1-T5 UI primitives (`components/ui/*`) + dev-only styleguide route
 - [ ] P1-T6 Env validation (`lib/env.ts`) + core lib + process.env lint ban
@@ -49,16 +47,21 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 
 ## In Progress
 
-- [/] P1-T2 Scaffold Next.js 14 (App Router, TS strict, src/, @ alias)
+- [/] P1-T3 Prettier + ESLint gates + npm scripts
 
 ## Done
 
 - [x] P1-T1 Git init + security baseline — `git init -b main` at project root; `git status`
   verified clean of secrets/env files; parent `C:\Users\ankit` repo untouched (nested repo takes precedence).
+- [x] P1-T2 Scaffold Next.js 14 — manual scaffold (create-next-app refuses non-empty dirs):
+  package.json + tsconfig (strict + noUncheckedIndexedAccess) + next/postcss/tailwind configs +
+  minimal `src/app`; `pnpm build` green (pnpm 11 required `allowBuilds` in pnpm-workspace.yaml for
+  unrs-resolver — approved, non-interactive).
 
 ## Session Log
 
 - 2026-09-11 — P1-T1 complete: fresh repo scoped to project root, security baseline verified.
+- 2026-09-11 — P1-T2 complete: Next.js 14.2 + React 18.3 + TS 5.9 installed via pnpm; build verified.
 
 - 2026-09-11 — Phase 1 documentation generated (`prd.md`, `trd.md`, `architecture.md`, `design.md`,
   `schema.md`, `implementation.md`, `todo.md`, `rules.md`, `.gitignore`, `.env.example`, `SECURITY.md`).
