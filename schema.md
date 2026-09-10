@@ -98,6 +98,7 @@ Index: `INDEX (taskId, createdAt)` — thread ordering.
 | `actorId` | String | FK→User `RESTRICT` |
 | `type` | Enum `ActivityType` — `PROJECT_CREATED`, `MEMBER_ADDED`, `MEMBER_REMOVED`, `TASK_CREATED`, `TASK_MOVED`, `TASK_ASSIGNED`, `TASK_COMPLETED`, `TASK_DELETED`, `COMMENT_ADDED` | |
 | `metadata` | Json | e.g. `{"from":"TODO","to":"DONE","taskTitle":"…"}` — feed must render without joins to deleted rows |
+| `createdAt` | DateTime | default `now()` — feed ordering |
 
 ## 3. Enums (Prisma)
 
