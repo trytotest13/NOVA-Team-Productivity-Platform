@@ -36,9 +36,14 @@ const envSchema = z
     }
   });
 
+// During `next build` (e.g. on Vercel) Next.js imports every route module while
+// collecting page data. Env vars may not be present in that context, so skip
+// validation at build time — it still runs at runtime via instrumentation.ts.
+const isBuildPhase = process.env.NEXT_PHASE === 'phase-production-build';
+
 const parsed = envSchema.safeParse(process.env);
 
-if (!parsed.success) {
+if (!parsed.success && !isBuildPhase) {
   const problems = parsed.error.issues
     .map((issue) => `  - ${issue.path.join('.')}: ${issue.message}`)
     .join('\n');
@@ -47,7 +52,19 @@ if (!parsed.success) {
   );
 }
 
-export const env = parsed.data;
+export const env = parsed.success
+  ? parsed.data
+  : {
+      // Build-time fallback only; runtime validation is enforced above.
+      APP_ROLE: 'api' as const,
+      NODE_ENV: 'production' as const,
+      DATABASE_URL: undefined,
+      AUTH_JWT_SECRET: undefined,
+      FRONTEND_URL: 'http://localhost:3000',
+      GOOGLE_CLIENT_ID: '',
+      GOOGLE_CLIENT_SECRET: '',
+      SEED_DEMO_PASSWORD: '',
+    };
 
 export const googleOAuthEnabled = Boolean(env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 
