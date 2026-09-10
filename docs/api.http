@@ -1,0 +1,144 @@
+### NOVA API smoke collection (P2-T5)
+### Use with the "REST Client" VS Code extension or an HTTP client of your choice.
+### Prereq: `pnpm dev` running at localhost:3000 and a signed-in session cookie.
+###
+### 1) Sign in in the browser (or via the login form), copy the `next-auth.session-token`
+###    cookie, and paste it below — the placeholder @token is used by every request.
+
+@token = paste-your-session-cookie-here
+@base = http://localhost:3000/api
+
+### ── Health / auth gates ─────────────────────────────────────────
+### Expect 401 UNAUTHORIZED envelope (no destructive effect)
+GET {{base}}/projects
+
+### Expect 401
+GET {{base}}/me/dashboard
+
+### ── Register (no session needed) ────────────────────────────────
+### Expect 201 { data: user } — then 409 CONFLICT when repeated
+POST {{base}}/register
+Content-Type: application/json
+
+{
+  "name": "Smoke Tester",
+  "email": "smoke@nova.test",
+  "password": "smoke-test-123"
+}
+
+### Expect 422 VALIDATION_ERROR (short password)
+POST {{base}}/register
+Content-Type: application/json
+
+{
+  "name": "Smoke Tester",
+  "email": "smoke2@nova.test",
+  "password": "short"
+}
+
+### ── Projects ────────────────────────────────────────────────────
+### Expect 200 { data: [...] } with progress/memberCount
+GET {{base}}/projects
+Cookie: next-auth.session-token={{token}}
+
+### Expect 201; creator becomes OWNER
+POST {{base}}/projects
+Cookie: next-auth.session-token={{token}}
+Content-Type: application/json
+
+{
+  "name": "Smoke Project",
+  "description": "Created from api.http",
+  "color": "#0EA5E9"
+}
+
+### Expect 422 (name required)
+POST {{base}}/projects
+Cookie: next-auth.session-token={{token}}
+Content-Type: application/json
+
+{
+  "name": ""
+}
+
+### Replace {{projectId}} with an id from the list above
+@projectId = paste-a-project-id
+
+### Expect 200 with stats.byStatus
+GET {{base}}/projects/{{projectId}}
+Cookie: next-auth.session-token={{token}}
+
+### Non-member project: expect 403 FORBIDDEN (paste a project the session user is NOT in)
+@foreignProjectId = paste-a-project-id-not-yours
+GET {{base}}/projects/{{foreignProjectId}}
+Cookie: next-auth.session-token={{token}}
+
+### ── Tasks ───────────────────────────────────────────────────────
+### Expect 200 (filter combos: ?status=TODO&priority=HIGH&assigneeId=&q=)
+GET {{base}}/projects/{{projectId}}/tasks?status=TODO
+Cookie: next-auth.session-token={{token}}
+
+### Expect 201
+POST {{base}}/projects/{{projectId}}/tasks
+Cookie: next-auth.session-token={{token}}
+Content-Type: application/json
+
+{
+  "title": "Smoke task",
+  "priority": "HIGH"
+}
+
+### Replace {{taskId}} with an id from the task list
+@taskId = paste-a-task-id
+
+### Expect 200 (status change also writes TASK_MOVED + TASK_COMPLETED activity)
+PATCH {{base}}/tasks/{{taskId}}
+Cookie: next-auth.session-token={{token}}
+Content-Type: application/json
+
+{
+  "status": "DONE"
+}
+
+### Expect 200 { data: { reordered } }
+POST {{base}}/tasks/{{taskId}}/reorder
+Cookie: next-auth.session-token={{token}}
+Content-Type: application/json
+
+{
+  "status": "IN_PROGRESS",
+  "taskIds": ["{{taskId}}"]
+}
+
+### ── Comments ────────────────────────────────────────────────────
+### Expect 201
+POST {{base}}/tasks/{{taskId}}/comments
+Cookie: next-auth.session-token={{token}}
+Content-Type: application/json
+
+{
+  "body": "Smoke comment from api.http"
+}
+
+### ── Members ─────────────────────────────────────────────────────
+### Expect 200
+GET {{base}}/projects/{{projectId}}/members
+Cookie: next-auth.session-token={{token}}
+
+### Expect 404 (user does not exist)
+POST {{base}}/projects/{{projectId}}/members
+Cookie: next-auth.session-token={{token}}
+Content-Type: application/json
+
+{
+  "email": "ghost@nova.test"
+}
+
+### ── Activity & dashboard ────────────────────────────────────────
+### Expect 200 { data: { items, nextCursor } }
+GET {{base}}/projects/{{projectId}}/activity
+Cookie: next-auth.session-token={{token}}
+
+### Expect 200
+GET {{base}}/me/dashboard
+Cookie: next-auth.session-token={{token}}

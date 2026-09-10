@@ -42,27 +42,31 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 
 ## In Progress
 
-- [/] P2-T1 Local database (docker-compose postgres:16) + Prisma init
+- [/] P3-T1 App shell (sidebar, topbar, user menu)
 
 ## Done
 
-- [x] P1-T1 Git init + security baseline — `git init -b main` at project root; `git status`
-  verified clean of secrets/env files; parent `C:\Users\ankit` repo untouched (nested repo takes precedence).
-- [x] P1-T2 Scaffold Next.js 14 — manual scaffold (create-next-app refuses non-empty dirs):
-  package.json + tsconfig (strict + noUncheckedIndexedAccess) + next/postcss/tailwind configs +
-  minimal `src/app`; `pnpm build` green (pnpm 11 required `allowBuilds` in pnpm-workspace.yaml for
-  unrs-resolver — approved, non-interactive).
-- [x] P1-T3 Prettier + ESLint gates — .prettierrc (singleQuote, pw 100, tailwindcss plugin);
-  ESLint: import/order (alphabetized, @/ pathGroups), no-console warn, raw `process.env` banned
-  (override for lib/env.ts); scripts lint/typecheck/format added. All green.
-- [x] P1-T4 Design tokens — tailwind.config (font sans var, shadow-card, project color set) +
-  Inter via next/font + tokenized landing page; zero raw hex in components.
-- [x] P1-T5 UI primitives — button/input/textarea/select/card/badge/avatar/dialog/dropdown-menu/
-  skeleton/spinner/toast/empty-state/error-state in `src/components/ui`, Providers wired in root
-  layout, `/styleguide` renders every state; lint/typecheck/build green.
-- [x] P1-T6 Env validation — `lib/env.ts` (Zod, server-only, Google vars optional) + `instrumentation.ts`
-  boot hook; verified: server refuses to boot with clear message when NEXTAUTH_SECRET invalid;
-  local `.env` created from example (gitignored, `git status` verified).
+- [x] P1-T1…P1-T6 — Phase 1 complete (see Session Log history below).
+- [x] P2-T1 Local database — docker-compose.yml (postgres:16) + Prisma 5.22 singleton + db scripts.
+  **Amended (user request): Docker not run in this session** — `docker compose up -d` + `pnpm db:migrate`
+  are pending; every other gate passes without a live DB.
+- [x] P2-T2 Prisma schema — valid per schema.md (enums, FKs, cascades, indexes); client generated.
+  Fix: added missing `Activity.createdAt` to schema.md (doc bug caught by prisma validate).
+- [x] P2-T3 Seed — idempotent (delete-by-key + recreate), demo users/projects/tasks/comments/activity;
+  password from SEED_DEMO_PASSWORD (never hardcoded). `prisma db seed` runnable once DB is up.
+- [x] P2-T4 NextAuth — Credentials + conditional Google provider, JWT strategy, Prisma adapter,
+  register route, login/register pages (RHF + Zod), middleware protecting /dashboard + /projects;
+  session.user.id augmented in types.
+- [x] P2-T5 API foundation — `lib/api.ts` (requireSession/requireProjectMember, envelopes,
+  handleApiError mapping Zod/Prisma errors), `lib/validations/{auth,project,task,comment}.ts`,
+  `docs/api.http` smoke collection (401/403/404/409/422 paths included).
+- [x] P2-T6 Projects + members API — list w/ progress, create (OWNER membership + activity),
+  detail w/ stats, owner-guarded update/archive/delete, add-by-email (404/409 handled),
+  remove with last-owner protection (409).
+- [x] P2-T7 Tasks/comments/reorder/activity/dashboard API — filtered task list, create w/ position
+  baseline + assignee-member check, PATCH w/ status-transition activities + completedAt handling,
+  creator-or-owner delete, transactional reorder w/ cross-project guard, comments CRUD per rules,
+  cursor-paginated activity feed, dashboard stats. All routes compiled (13 dynamic endpoints).
 
 ## Session Log
 
@@ -71,6 +75,11 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 - 2026-09-11 — P1-T6 complete. Documented micro-deviations: `lib/prisma.ts` placeholder deferred to
   P2-T1 (Prisma installs then); `instrumentation.ts` + `experimental.instrumentationHook` added as the
   boot-time env validation hook.
+- 2026-09-11 — Phase 2 code complete WITHOUT running Docker (user request: "don't run Docker Desktop,
+  just write the code"). Pending DB-dependent steps: `docker compose up -d` → `pnpm db:migrate` →
+  `pnpm db:seed`. Prisma pinned to 5.22.0 stable (v8 RC on the registry rejected). ESLint: disabled
+  `import/no-named-as-default` (next-auth providers are default exports) and `alphabetize`
+  (unstable against grouped path conventions).
 
 - 2026-09-11 — Phase 1 documentation generated (`prd.md`, `trd.md`, `architecture.md`, `design.md`,
   `schema.md`, `implementation.md`, `todo.md`, `rules.md`, `.gitignore`, `.env.example`, `SECURITY.md`).
