@@ -12,11 +12,6 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 
 ## Todo
 
-### Phase 1 — Setup & Tooling
-- [ ] P1-T4 Design tokens in Tailwind config + globals.css + Inter font
-- [ ] P1-T5 UI primitives (`components/ui/*`) + dev-only styleguide route
-- [ ] P1-T6 Env validation (`lib/env.ts`) + core lib + process.env lint ban
-
 ### Phase 2 — Database, Auth & API
 - [ ] P2-T1 Local database (docker-compose postgres:16) + Prisma init
 - [ ] P2-T2 Prisma schema + migration (match schema.md)
@@ -47,7 +42,7 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
 
 ## In Progress
 
-- [/] P1-T3 Prettier + ESLint gates + npm scripts
+- [/] P2-T1 Local database (docker-compose postgres:16) + Prisma init
 
 ## Done
 
@@ -57,11 +52,25 @@ Legend: `[ ]` Todo · `[/]` In Progress · `[x]` Done
   package.json + tsconfig (strict + noUncheckedIndexedAccess) + next/postcss/tailwind configs +
   minimal `src/app`; `pnpm build` green (pnpm 11 required `allowBuilds` in pnpm-workspace.yaml for
   unrs-resolver — approved, non-interactive).
+- [x] P1-T3 Prettier + ESLint gates — .prettierrc (singleQuote, pw 100, tailwindcss plugin);
+  ESLint: import/order (alphabetized, @/ pathGroups), no-console warn, raw `process.env` banned
+  (override for lib/env.ts); scripts lint/typecheck/format added. All green.
+- [x] P1-T4 Design tokens — tailwind.config (font sans var, shadow-card, project color set) +
+  Inter via next/font + tokenized landing page; zero raw hex in components.
+- [x] P1-T5 UI primitives — button/input/textarea/select/card/badge/avatar/dialog/dropdown-menu/
+  skeleton/spinner/toast/empty-state/error-state in `src/components/ui`, Providers wired in root
+  layout, `/styleguide` renders every state; lint/typecheck/build green.
+- [x] P1-T6 Env validation — `lib/env.ts` (Zod, server-only, Google vars optional) + `instrumentation.ts`
+  boot hook; verified: server refuses to boot with clear message when NEXTAUTH_SECRET invalid;
+  local `.env` created from example (gitignored, `git status` verified).
 
 ## Session Log
 
 - 2026-09-11 — P1-T1 complete: fresh repo scoped to project root, security baseline verified.
 - 2026-09-11 — P1-T2 complete: Next.js 14.2 + React 18.3 + TS 5.9 installed via pnpm; build verified.
+- 2026-09-11 — P1-T6 complete. Documented micro-deviations: `lib/prisma.ts` placeholder deferred to
+  P2-T1 (Prisma installs then); `instrumentation.ts` + `experimental.instrumentationHook` added as the
+  boot-time env validation hook.
 
 - 2026-09-11 — Phase 1 documentation generated (`prd.md`, `trd.md`, `architecture.md`, `design.md`,
   `schema.md`, `implementation.md`, `todo.md`, `rules.md`, `.gitignore`, `.env.example`, `SECURITY.md`).
