@@ -41,6 +41,11 @@ export function apiSuccess<T>(data: T, status = 200): NextResponse {
 }
 
 export function handleApiError(error: unknown): NextResponse {
+  // Next.js signals "this route must be dynamic" by throwing an error carrying this
+  // digest. Swallowing it here would mask that signal and report a 500 instead.
+  if ((error as { digest?: unknown } | null)?.digest === 'DYNAMIC_SERVER_USAGE') {
+    throw error;
+  }
   if (error instanceof ApiRequestError) {
     return NextResponse.json(
       { error: { code: error.code, message: error.message, details: error.details } },
