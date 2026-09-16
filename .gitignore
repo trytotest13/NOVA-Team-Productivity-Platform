@@ -44,3 +44,6 @@ _page*.png
 _repaired*.pdf
 
 # Documents
+*.md
+!README.md
+*.pdf
